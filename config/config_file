@@ -1,1 +1,11 @@
-
+{
+  "github.copilot.chat.mcp.enabled": true,
+  "github.copilot.chat.mcp.servers": {
+    "RAG_Document_Filter": {
+      "command": "C:/gits/kaleydboggs.venv/Scripts/python.exe",
+      "args": [
+        "c:/gits/innovation/use-cases/character-of-discharge/cod-mcp-project/src/rag_mcp_server.py"
+      ]
+    }
+  }
+}
