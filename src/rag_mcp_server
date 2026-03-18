@@ -1,0 +1,89 @@
+import time
+import twt
+imprt uuid
+import requests
+from typeing import List, Dict, Any, Iterable
+import urllib3
+from mcp_server.fastmcp import FastMCP
+import pandas as pd
+import re
+import os
+import boto3
+
+#Suppress warding for dev env
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) ''
+''
+'#initilize fast mcp server'
+mcp=fastMCP("RAG Document Filter")
+
+#=============
+Configuration
+
+BASE_URL = "https://url.here"
+
+#JWT credentials for API
+JWT_CONFIG= {
+    'issuer': "your-issuer",
+    'secret: "your-secret",
+    'application_id': "your-app-id",
+    'user_id': "your-additional-id",
+    'station_id': "your-station-id",
+    'time_valid': 3600  
+
+}
+
+#Document patterns
+RAG_DOC_PATTERN= {
+    "doctype1": ["doc1a", "doc1b", "doc1c"
+             ],
+    "doctype2": ["doc2a", "doc2b", "doc2c"  ]
+             } 
+
+#=============
+#CORE FUNCTIONS
+#===============
+
+def generate_jwt_token(ocr_retrieval: bool) -> str:
+    """Generate a JWT token based on API configuration."""
+    current_time=int(time.time())   
+    if ocr_retrieval:
+        user='CE_SYSACCT'
+    else:
+    user=JWT_CONFIG['user_id'] 
+token=jwt.encode(
+    {
+        'jti': str(uuid.uuid4()),
+        'iat': current_time,    
+        'exp': current_time + JWT_CONFIG['time_valid'], 
+        'iss': JWT_CONFIG['issuer'],
+        'application_id': JWT_CONFIG['application_id'],
+        'user_id': user,
+        'station_id': JWT_CONFIG['station_id']
+        },
+        JWT_CONFIG['secret'],
+        alorgorithm='HS256'
+
+)
+return token
+
+
+def get_document_types():
+    """Generate JWT token for API.""" 
+    token=generate_jwt_token(ocr_retrieval=False)   
+
+response=requests.get(
+    #method="GET",
+    verify=False,
+    url='https://url',
+    headers={'Authorization': f'Bearer {generate_jwt_token(ocr_retrieval=False)}'} ,
+    timeout=10 #seconds
+)
+doctype_df=pd.DataFrame(response.json()['documentTypes'])
+doctype_df.index= doctye_df['id']
+doc_type_desc_lookup=doctype_df[['description']].to_dict()['description']
+return doc_type_desc_lookup
+
+doc_type_lookup=get_document_types()    #get the doc types
+
+def search_all_documents (file_number:str,results_per_page: int=100) -> List[Dict[str, Any]]:
+    
